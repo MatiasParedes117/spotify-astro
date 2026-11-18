@@ -1,0 +1,33 @@
+{
+  "name": "spotify-astro",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Réplica visual e interactiva de Spotify Web — Proyecto académico RA2, ULagos. Migrado a Astro.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github-segunda:MatiasParedes117/Spotify-dos.git"
+  },
+  "keywords": [
+    "spotify",
+    "astro",
+    "tailwindcss",
+    "javascript"
+  ],
+  "author": "Matyaz Paredes",
+  "license": "MIT",
+  "dependencies": {
+    "astro": "^7.4.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.4",
+    "tailwindcss": "^4.3.4"
+  }
+}

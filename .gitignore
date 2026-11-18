@@ -1,0 +1,18 @@
+# Dependencias
+node_modules/
+
+# Build de Astro
+dist/
+.astro/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
