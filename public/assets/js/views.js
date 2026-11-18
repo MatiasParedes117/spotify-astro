@@ -744,7 +744,7 @@ function renderAbout() {
   <header class="sp2-about-hero mb-10">
     <span class="sp2-about-logo">${icon("logo")}</span>
     <div class="relative z-10 min-w-0">
-      <p class="sp2-eyebrow">Proyecto académico · RA2</p>
+      <p class="sp2-eyebrow">Proyecto académico · RA3</p>
       <h1 class="mt-1 text-3xl font-black text-white sm:text-5xl">Spotify Clone</h1>
       <p class="mt-3 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
         Réplica visual e interactiva de Spotify Web construida con HTML, Tailwind CSS 4 y JavaScript vanilla.
@@ -826,7 +826,7 @@ function renderAbout() {
   <section class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
     <article class="sp2-about-card">
       <h2>Autor</h2>
-      <p><strong class="text-white">Matyaz Paredes</strong><br/>Estudiante de la Universidad de Los Lagos.<br/>Proyecto de evaluación RA2.</p>
+      <p><strong class="text-white">Matyaz Paredes</strong><br/>Estudiante de la Universidad de Los Lagos.<br/>Proyecto de evaluación RA3.</p>
     </article>
     <article class="sp2-about-card">
       <h2>Cómo probar</h2>

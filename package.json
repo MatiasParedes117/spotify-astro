@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Réplica visual e interactiva de Spotify Web — Proyecto académico RA2, ULagos. Migrado a Astro.",
+  "description": "Réplica visual e interactiva de Spotify Web — Proyecto académico RA3, ULagos. Migrado a Astro.",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
