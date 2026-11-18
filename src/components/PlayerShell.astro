@@ -1,0 +1,219 @@
+<footer id="sp2-player" aria-label="Reproductor">
+  <div class="sp2-player-left">
+    <button type="button" id="sp2-player-cover" class="sp2-player-cover" aria-label="Portada"></button>
+    <div class="sp2-player-meta">
+      <p id="sp2-player-title" class="sp2-player-title">Elige una canción</p>
+      <p id="sp2-player-artist" class="sp2-player-artist">Artista</p>
+      <p id="sp2-player-source" class="sp2-player-source" aria-live="polite">
+        Muestras de iTunes disponibles
+      </p>
+    </div>
+    <button
+      type="button"
+      id="sp2-like"
+      class="sp2-tool-btn sp2-like-btn"
+      aria-label="Me gusta"
+      aria-pressed="false"
+    ></button>
+  </div>
+
+  <div class="sp2-player-center">
+    <div class="sp2-ctrl-row">
+      <button
+        type="button"
+        id="sp2-btn-shuffle"
+        class="sp2-ctrl-btn"
+        aria-label="Aleatorio"
+        title="Aleatorio"
+        aria-pressed="false"
+      ><span id="sp2-ico-shuffle"></span></button>
+      <button
+        type="button"
+        id="sp2-btn-prev"
+        class="sp2-ctrl-btn sp2-ctrl-strong"
+        aria-label="Anterior"
+        title="Anterior"
+      ><span id="sp2-ico-prev"></span></button>
+      <button type="button" id="sp2-btn-play" class="sp2-play-main" aria-label="Reproducir">
+        <span id="sp2-ico-play"></span>
+      </button>
+      <button
+        type="button"
+        id="sp2-btn-next"
+        class="sp2-ctrl-btn sp2-ctrl-strong"
+        aria-label="Siguiente"
+        title="Siguiente"
+      ><span id="sp2-ico-next"></span></button>
+      <button
+        type="button"
+        id="sp2-btn-repeat"
+        class="sp2-ctrl-btn"
+        aria-label="Repetir"
+        title="Repetir"
+        aria-pressed="false"
+      ><span id="sp2-ico-repeat"></span></button>
+    </div>
+    <div class="sp2-progress-row">
+      <span id="sp2-time" class="sp2-time">0:00</span>
+      <input
+        id="sp2-progress"
+        class="sp2-slider"
+        type="range"
+        min="0"
+        max="100"
+        step="0.1"
+        value="0"
+        aria-label="Progreso de reproducción"
+      />
+      <span id="sp2-dur" class="sp2-time sp2-time-right">0:00</span>
+    </div>
+  </div>
+
+  <div class="sp2-player-right">
+    <button
+      type="button"
+      id="sp2-btn-queue"
+      class="sp2-tool-btn"
+      aria-label="Cola de reproducción"
+      title="Cola"
+    ><span id="sp2-ico-queue"></span></button>
+    <button
+      type="button"
+      id="sp2-player-devices"
+      class="sp2-tool-btn"
+      aria-label="Dispositivos"
+      title="Dispositivos"
+    ><span id="sp2-ico-devices"></span></button>
+    <button
+      type="button"
+      id="sp2-btn-mute"
+      class="sp2-tool-btn"
+      aria-label="Silenciar"
+      title="Silenciar"
+    ><span id="sp2-ico-vol"></span></button>
+    <input
+      id="sp2-volume"
+      class="sp2-slider sp2-vol"
+      type="range"
+      min="0"
+      max="100"
+      value="70"
+      aria-label="Volumen"
+    />
+  </div>
+</footer>
+
+<div id="sp2-mini-player">
+  <span class="sp2-mini-bar" id="sp2-mini-bar"></span>
+  <button type="button" id="sp2-mini-open" class="sp2-mini-open" aria-label="Abrir reproductor completo">
+    <span id="sp2-mini-cover" class="sp2-mini-cover"></span>
+    <span class="sp2-mini-meta">
+      <span id="sp2-mini-title" class="sp2-mini-title">Elige una canción</span>
+      <span id="sp2-mini-artist" class="sp2-mini-artist">Artista</span>
+    </span>
+  </button>
+  <button type="button" id="sp2-mini-play" class="sp2-mini-play" aria-label="Reproducir / Pausar">
+    <span id="sp2-ico-mini-play"></span>
+  </button>
+</div>
+
+<div
+  id="sp2-now-playing"
+  class="invisible"
+  aria-hidden="true"
+  aria-label="Reproductor a pantalla completa"
+>
+  <div class="sp2-np-top">
+    <button type="button" id="sp2-np-close" class="sp2-np-icon-btn" aria-label="Cerrar">
+      <span id="sp2-ico-npdown"></span>
+    </button>
+    <div class="sp2-np-context-wrap">
+      <p class="sp2-np-eyebrow">Reproduciendo desde</p>
+      <p id="sp2-np-context" class="sp2-np-context">Spotify Clone</p>
+    </div>
+    <button type="button" id="sp2-np-more" class="sp2-np-icon-btn" aria-label="Más opciones">
+      <span id="sp2-ico-npmore"></span>
+    </button>
+  </div>
+
+  <div class="sp2-np-body">
+    <div class="sp2-np-cover-wrap"><div id="sp2-np-cover"></div></div>
+    <div class="sp2-np-meta">
+      <div class="min-w-0">
+        <p id="sp2-np-title" class="sp2-np-title">Elige una canción</p>
+        <p id="sp2-np-artist" class="sp2-np-artist">Artista</p>
+        <p id="sp2-np-source" class="sp2-np-source" aria-live="polite">
+          Muestras de iTunes disponibles
+        </p>
+      </div>
+      <button
+        type="button"
+        id="sp2-np-like"
+        class="sp2-np-icon-btn"
+        aria-label="Me gusta"
+        aria-pressed="false"
+      ></button>
+    </div>
+    <a
+      id="sp2-np-source-link"
+      class="sp2-np-source-link"
+      href="#"
+      target="_blank"
+      rel="noopener noreferrer"
+      hidden
+    >Escuchar en Apple Music</a>
+
+    <div>
+      <div class="sp2-np-progress-row">
+        <span id="sp2-np-time" class="sp2-time">0:00</span>
+        <input
+          id="sp2-np-progress"
+          class="sp2-slider"
+          type="range"
+          min="0"
+          max="100"
+          step="0.1"
+          value="0"
+          aria-label="Progreso"
+        />
+        <span id="sp2-np-dur" class="sp2-time sp2-time-right">0:00</span>
+      </div>
+    </div>
+
+    <div class="sp2-np-controls">
+      <button type="button" id="sp2-np-shuffle" class="sp2-np-ctrl" aria-label="Aleatorio" aria-pressed="false">
+        <span id="sp2-ico-npsh"></span>
+      </button>
+      <button type="button" id="sp2-np-prev" class="sp2-np-ctrl sp2-np-ctrl-strong" aria-label="Anterior">
+        <span id="sp2-ico-npprev"></span>
+      </button>
+      <button type="button" id="sp2-np-play" class="sp2-np-play" aria-label="Reproducir">
+        <span id="sp2-ico-npplay"></span>
+      </button>
+      <button type="button" id="sp2-np-next" class="sp2-np-ctrl sp2-np-ctrl-strong" aria-label="Siguiente">
+        <span id="sp2-ico-npnext"></span>
+      </button>
+      <button type="button" id="sp2-np-repeat" class="sp2-np-ctrl" aria-label="Repetir" aria-pressed="false">
+        <span id="sp2-ico-nprep"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<aside id="sp2-queue-panel" class="invisible" aria-label="Cola de reproducción" aria-hidden="true">
+  <div class="sp2-queue-head">
+    <h2 class="sp2-queue-title">Cola de reproducción</h2>
+    <button type="button" id="sp2-queue-close" class="sp2-queue-close" aria-label="Cerrar">
+      <span id="sp2-ico-qclose"></span>
+    </button>
+  </div>
+  <div class="sp2-queue-tabs" role="tablist" aria-label="Panel del reproductor">
+    <button type="button" class="sp2-queue-tab active" data-queue-tab="queue" role="tab" aria-selected="true">
+      Cola
+    </button>
+    <button type="button" class="sp2-queue-tab" data-queue-tab="lyrics" role="tab" aria-selected="false">
+      Letra
+    </button>
+  </div>
+  <div id="sp2-queue-content" class="sp2-queue-content scroll-area"></div>
+</aside>

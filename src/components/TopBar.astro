@@ -1,0 +1,179 @@
+---
+import { NAV_ITEMS } from '../data/navigation';
+
+interface Props {
+  page: string;
+}
+
+const { page } = Astro.props;
+---
+
+<a href="/" class="sp2-logo-wrap" aria-label="Spotify Clone, ir al inicio">
+  <span class="sp2-logo-icon" id="sp2-icon-logo"></span>
+  <span class="sp2-logo-text">Spotify<span>.</span></span>
+</a>
+
+<div class="sp2-history-actions">
+  <button id="sp2-btn-back" class="sp2-nav-btn" aria-label="Atrás" title="Atrás">
+    <span id="sp2-ico-back"></span>
+  </button>
+  <button id="sp2-btn-fwd" class="sp2-nav-btn" aria-label="Adelante" title="Adelante">
+    <span id="sp2-ico-fwd"></span>
+  </button>
+</div>
+
+<nav class="sp2-header-nav" aria-label="Navegación principal">
+  {
+    NAV_ITEMS.map((item) => (
+      <a
+        href={item.href}
+        class:list={['sp2-header-link', page === item.key && 'active']}
+        data-nav-page={item.key}
+        aria-current={page === item.key ? 'page' : undefined}
+        aria-label={item.label}
+        title={item.label}
+      >
+        <span class="sp2-header-link-icon" id={`sp2-ico-hdr-${item.key}`}></span>
+        <span class="sp2-header-link-label">{item.label}</span>
+      </a>
+    ))
+  }
+</nav>
+
+<form id="sp2-header-search-form" class="sp2-search-bar" role="search">
+  <span class="sp2-search-icon" id="sp2-ico-search"></span>
+  <input
+    id="sp2-header-search"
+    type="search"
+    autocomplete="off"
+    placeholder="¿Qué quieres escuchar?"
+    aria-label="Buscar en Spotify Clone"
+  />
+  <kbd class="sp2-kbd">Ctrl K</kbd>
+</form>
+
+<div class="sp2-topbar-actions">
+  <a href="/premium" class="sp2-premium-link topbar-desktop">Explorar Premium</a>
+
+  <button
+    type="button"
+    id="sp2-install-btn"
+    class="sp2-tool-btn topbar-desktop"
+    aria-label="Instalar app"
+    title="Instalar app"
+  >
+    <span id="sp2-ico-install"></span>
+  </button>
+
+  <div class="relative">
+    <button
+      type="button"
+      id="sp2-notif-btn"
+      class="sp2-tool-btn sp2-notif-btn"
+      aria-label="Notificaciones, 3 sin leer"
+      aria-haspopup="true"
+      aria-expanded="false"
+      title="Notificaciones"
+    >
+      <span id="sp2-ico-bell"></span>
+      <span class="sp2-notif-count" id="sp2-notif-count" aria-hidden="true">3</span>
+    </button>
+    <div
+      id="sp2-notif-menu"
+      class="sp2-dropdown sp2-dropdown--wide hidden"
+      role="region"
+      aria-label="Notificaciones"
+    >
+      <div class="sp2-notif-header">
+        <div>
+          <p class="sp2-notif-title">Notificaciones</p>
+          <p class="sp2-notif-subtitle">Novedades de esta demostración</p>
+        </div>
+        <button
+          type="button"
+          id="sp2-notif-mark-read"
+          class="sp2-notif-mark-read"
+          data-action="mark-notifications-read"
+        >
+          Marcar todas leídas
+        </button>
+      </div>
+      <button
+        type="button"
+        class="sp2-notification-item"
+        data-notif-id="new-release"
+        data-notif-action="new-release"
+      >
+        <span class="sp2-notification-icon" id="sp2-ico-notif-radio"></span>
+        <span class="sp2-notification-copy">
+          <span class="sp2-notification-name">Un Verano Sin Ti</span>
+          <span class="sp2-notification-description">Vuelve a escuchar un favorito de Bad Bunny.</span>
+        </span>
+        <span class="sp2-notification-unread" aria-hidden="true"></span>
+      </button>
+      <button
+        type="button"
+        class="sp2-notification-item"
+        data-notif-id="playlist"
+        data-notif-action="playlist"
+      >
+        <span class="sp2-notification-icon" id="sp2-ico-notif-list"></span>
+        <span class="sp2-notification-copy">
+          <span class="sp2-notification-name">Daily Mix 1</span>
+          <span class="sp2-notification-description">Tu mezcla está lista para reproducirse.</span>
+        </span>
+        <span class="sp2-notification-unread" aria-hidden="true"></span>
+      </button>
+      <button
+        type="button"
+        class="sp2-notification-item"
+        data-notif-id="premium"
+        data-notif-action="premium"
+      >
+        <span class="sp2-notification-icon" id="sp2-ico-notif-premium"></span>
+        <span class="sp2-notification-copy">
+          <span class="sp2-notification-name">Planes Premium</span>
+          <span class="sp2-notification-description">Explora los planes; la compra es simulada.</span>
+        </span>
+        <span class="sp2-notification-unread" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="relative">
+    <button
+      type="button"
+      class="sp2-profile-btn"
+      id="sp2-profile-btn"
+      aria-label="Menú de perfil"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      <span class="sp2-avatar" id="sp2-profile-avatar">MP</span>
+      <span id="sp2-ico-chdown" class="topbar-desktop sp2-profile-caret"></span>
+    </button>
+    <div id="sp2-profile-menu" class="sp2-dropdown hidden" role="menu" aria-label="Perfil">
+      <div class="sp2-dropdown-profile">
+        <p class="sp2-dropdown-name" id="sp2-profile-name">Matyaz Paredes</p>
+        <p id="sp2-profile-plan" class="sp2-dropdown-plan">Plan Free</p>
+      </div>
+      <div class="sp2-menu-divider"></div>
+      <a class="sp2-menu-item" href="/cuenta" role="menuitem">
+        <span id="sp2-ico-user" class="sp2-menu-icon"></span> Cuenta
+      </a>
+      <a class="sp2-menu-item" href="/premium" role="menuitem">
+        <span id="sp2-ico-star" class="sp2-menu-icon"></span> Planes Premium
+      </a>
+      <a class="sp2-menu-item" href="/acerca" role="menuitem">
+        <span id="sp2-ico-info" class="sp2-menu-icon"></span> Acerca del proyecto
+      </a>
+      <div class="sp2-menu-divider"></div>
+      <button type="button" class="sp2-menu-item" data-action="logout" role="menuitem">
+        <span id="sp2-ico-logout" class="sp2-menu-icon"></span> Cerrar sesión
+      </button>
+      <button type="button" class="sp2-menu-item" data-action="reset-local-data" role="menuitem">
+        <span id="sp2-ico-reset" class="sp2-menu-icon"></span> Borrar datos locales
+      </button>
+    </div>
+  </div>
+</div>

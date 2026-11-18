@@ -1,5 +1,9 @@
 ---
 import AmbientBackdrop from '../components/AmbientBackdrop.astro';
+import BottomNavigation from '../components/BottomNavigation.astro';
+import PlayerShell from '../components/PlayerShell.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TopBar from '../components/TopBar.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -42,27 +46,19 @@ const {
     <a class="sp2-skip-link" href="#sp2-view">Saltar al contenido principal</a>
 
     <div id="sp2-shell">
-      <header id="sp2-topbar"></header>
+      <header id="sp2-topbar"><TopBar page={page} /></header>
 
       <div id="sp2-main-area">
-        <aside id="sp2-sidebar" aria-label="Tu biblioteca y navegación"></aside>
+        <aside id="sp2-sidebar" aria-label="Tu biblioteca y navegación"><Sidebar /></aside>
         <main id="sp2-main">
-          <div id="sp2-view" class="scroll-area" aria-live="polite"></div>
+          <div id="sp2-view" class="scroll-area" tabindex="-1" aria-live="polite"></div>
         </main>
       </div>
 
-      <footer id="sp2-player" aria-label="Reproductor"></footer>
-      <div id="sp2-mini-player" role="button" tabindex="0" aria-label="Abrir reproductor"></div>
-      <nav id="sp2-bottom-nav" aria-label="Navegación principal"></nav>
+      <PlayerShell />
+      <BottomNavigation page={page} />
     </div>
 
-    <div
-      id="sp2-now-playing"
-      class="invisible"
-      aria-hidden="true"
-      aria-label="Reproductor a pantalla completa"
-    ></div>
-    <aside id="sp2-queue-panel" class="invisible" aria-label="Cola de reproducción" aria-hidden="true"></aside>
     <div id="sp2-modal" class="hidden"></div>
     <div id="sp2-toast" role="status" aria-live="polite"></div>
 

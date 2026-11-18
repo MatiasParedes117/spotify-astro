@@ -1,0 +1,25 @@
+---
+import { NAV_ITEMS } from '../data/navigation';
+
+interface Props {
+  page: string;
+}
+
+const { page } = Astro.props;
+---
+
+<nav id="sp2-bottom-nav" aria-label="Navegación principal">
+  {
+    NAV_ITEMS.map((item) => (
+      <a
+        href={item.href}
+        class:list={['sp2-bottom-link', page === item.key && 'active']}
+        data-nav-page={item.key}
+        aria-current={page === item.key ? 'page' : undefined}
+      >
+        <span class="ico" id={`sp2-ico-bn-${item.key}`}></span>
+        <span class="sp2-bottom-label">{item.label}</span>
+      </a>
+    ))
+  }
+</nav>

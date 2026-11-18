@@ -3,6 +3,14 @@
  * ================================================================== */
 
 const IMG = "/assets/img";
+const MUSIC_COVERS = {
+  billie: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/92/9f/69/929f69f1-9977-3a44-d674-11f70c852d1b/24UMGIM36186.rgb.jpg/600x600bb.jpg",
+  olivia: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/02/ed/8c/02ed8cab-c089-2fdd-7ce6-ab334a9a4e19/21UMGIM26093.rgb.jpg/600x600bb.jpg",
+  shakira: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/55/0e/5e/550e5ecc-3fe4-50df-c5a3-a019b67008c3/196871854894.jpg/600x600bb.jpg",
+  gepeHablar: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/e5/97/a5/e597a519-d8ed-1145-778a-a36731d5666e/8429006972586.jpg/600x600bb.jpg",
+  gepeNature: "https://is1-ssl.mzstatic.com/image/thumb/Music3/v4/84/97/ba/8497badd-c6eb-575a-c7ed-25699327dab0/859709083957.jpg/600x600bb.jpg",
+  gepe: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/34/63/b9/3463b9b9-b989-84af-2c11-56ab7096e7dd/8429006774678.jpg/600x600bb.jpg",
+};
 const DEFAULT_LOCAL_PROFILE = Object.freeze({
   name: "Matyaz Paredes",
   email: "matyaz@estudiante.ulagos.cl",
@@ -51,6 +59,14 @@ const DB = {
       bio: "La voz más honesta del R&B alternativo. Sus letras introspectivas sobre amor, identidad y crecimiento conectan profundamente." },
     { id: "a-coldplay",   name: "Coldplay",         img: `${IMG}/artists/coldplay.jpg`,       genre: "Rock / Alternative",      monthly: "41.3M", verified: true,
       bio: "Banda británica que lleva décadas entregando himnos emocionantes. De 'Yellow' a 'Music of the Spheres', siempre evolucionando." },
+    { id: "a-billie",     name: "Billie Eilish",    img: `${IMG}/artists/billie-eilish.jpg`, genre: "Pop / Alternative",       monthly: "—",     verified: true,
+      bio: "Cantautora estadounidense reconocida por su pop alternativo, su voz íntima y una producción sonora experimental." },
+    { id: "a-olivia",     name: "Olivia Rodrigo",   img: `${IMG}/artists/olivia-rodrigo.jpg`,genre: "Pop / Rock",              monthly: "—",     verified: true,
+      bio: "Cantautora estadounidense que combina pop y rock con letras directas sobre crecer, cambiar y vivir nuevas experiencias." },
+    { id: "a-shakira",    name: "Shakira",          img: `${IMG}/artists/shakira.jpg`,       genre: "Pop Latino",              monthly: "—",     verified: true,
+      bio: "Cantautora colombiana que mezcla pop latino, ritmos globales y una trayectoria de éxitos en español e inglés." },
+    { id: "a-gepe",       name: "Gepe",             img: `${IMG}/artists/gepe.jpg`,          genre: "Pop / Indie Chileno",     monthly: "—",     verified: true,
+      bio: "Músico y cantautor chileno que fusiona pop, indie y sonidos latinoamericanos en canciones de identidad propia." },
   ],
 
   albums: [
@@ -82,27 +98,35 @@ const DB = {
       songs:[["s48","Kill Bill",154],["s49","Shirt",219],["s50","Gone Girl",228],["s51","Used",204]] },
     { id:"al-parachutes",title:"Parachutes",              artistId:"a-coldplay",  year:2000, img:`${IMG}/albums/parachutes.jpg`,
       songs:[["s52","Yellow",267],["s53","The Scientist",309],["s54","Trouble",227],["s55","Shiver",299]] },
+    { id:"al-billie-hmh",title:"HIT ME HARD AND SOFT",    artistId:"a-billie",    year:2024, img:MUSIC_COVERS.billie,
+      songs:[["s56","Birds of a Feather",210,MUSIC_COVERS.billie],["s57","Lunch",179,MUSIC_COVERS.billie],["s58","Chihiro",303,MUSIC_COVERS.billie],["s59","Wildflower",261,MUSIC_COVERS.billie]] },
+    { id:"al-olivia-sour",title:"SOUR",                   artistId:"a-olivia",    year:2021, img:MUSIC_COVERS.olivia,
+      songs:[["s60","drivers license",242,MUSIC_COVERS.olivia],["s61","good 4 u",178,MUSIC_COVERS.olivia],["s62","deja vu",215,MUSIC_COVERS.olivia],["s63","traitor",229,MUSIC_COVERS.olivia]] },
+    { id:"al-shakira-lmyl",title:"Las Mujeres Ya No Lloran",artistId:"a-shakira", year:2024, img:MUSIC_COVERS.shakira,
+      songs:[["s64","Puntería",180,MUSIC_COVERS.shakira],["s65","TQG",197,`${IMG}/albums/manana-sera-bonito.jpg`],["s66","Acróstico",170,MUSIC_COVERS.shakira],["s67","Copa Vacía",182,MUSIC_COVERS.shakira]] },
+    { id:"al-gepe-estilo",title:"Estilo Libre",           artistId:"a-gepe",      year:2015, img:MUSIC_COVERS.gepe,
+      songs:[["s68","Hablar de Ti",218,MUSIC_COVERS.gepeHablar],["s69","En la Naturaleza",220,MUSIC_COVERS.gepeNature],["s70","Siempre",194,MUSIC_COVERS.gepe],["s71","Ser Amigos",213,MUSIC_COVERS.gepe]] },
   ],
 
   playlists: [
     { id:"pl-topglobal", name:"Top 50 Global",          img:`${IMG}/playlists/top-global.jpg`,      desc:"Las canciones más escuchadas del planeta ahora mismo.", owner:"Spotify",
-      songIds:["s25","s1","s9","s17","s29","s44","s13","s48","s40","s6"] },
+      songIds:["s25","s56","s1","s9","s60","s17","s29","s64","s44","s13","s48","s40","s6"] },
     { id:"pl-exitos",    name:"Éxitos de Hoy",          img:`${IMG}/playlists/exitos-de-hoy.jpg`,   desc:"Los hits frescos que dominan las listas.", owner:"Spotify",
-      songIds:["s9","s13","s1","s17","s25","s29","s40","s44","s48","s30"] },
+      songIds:["s9","s13","s56","s1","s60","s17","s25","s29","s64","s40","s44","s48","s30"] },
     { id:"pl-daily1",    name:"Daily Mix 1",            img:`${IMG}/playlists/daily-mix-1.jpg`,     desc:"Bad Bunny, Feid, Karol G y más.", owner:"Spotify",
       songIds:["s1","s13","s9","s3","s16","s11","s5","s6","s7","s15"] },
     { id:"pl-daily2",    name:"Daily Mix 2",            img:`${IMG}/playlists/daily-mix-2.jpg`,     desc:"The Weeknd, Dua Lipa, Taylor Swift y más.", owner:"Spotify",
-      songIds:["s25","s29","s17","s27","s31","s18","s30","s19","s26","s20"] },
+      songIds:["s25","s29","s17","s60","s27","s31","s18","s30","s19","s61","s26","s20"] },
     { id:"pl-lofi",      name:"Chill Lo-Fi",            img:`${IMG}/playlists/chill-lofi.jpg`,      desc:"Beats tranquilos para estudiar, leer o descansar.", owner:"Spotify",
       songIds:["s21","s33","s36","s52","s54","s23","s55","s53","s24","s35"] },
     { id:"pl-fitness",   name:"Gym Mode 💪",            img:`${IMG}/playlists/gimnasio.jpg`,        desc:"El soundtrack para tu entrenamiento más intenso.", owner:"Spotify",
       songIds:["s44","s40","s1","s25","s9","s29","s17","s45","s13","s41"] },
     { id:"pl-rockcl",    name:"Rock Nacional CL",       img:`${IMG}/playlists/rock-nacional.jpg`,   desc:"Lo mejor del rock chileno, clásico y contemporáneo.", owner:"Spotify",
-      songIds:["s36","s37","s38","s39","s33","s34","s35"] },
+      songIds:["s36","s37","s68","s69","s38","s39","s33","s34","s35"] },
     { id:"pl-ferxxo",    name:"Bichota Party 🐍",       img:`${IMG}/playlists/bichota-party.jpg`,   desc:"100% reggaeton y urbano de lo más pesado.", owner:"Spotify",
       songIds:["s9","s1","s13","s6","s3","s11","s16","s7","s15","s4"] },
     { id:"pl-latinx",    name:"Latino Caliente",        img:`${IMG}/playlists/latino-caliente.jpg`, desc:"El sabor latino que te pone a bailar.", owner:"Spotify",
-      songIds:["s1","s9","s13","s43","s40","s3","s11","s12","s5","s16"] },
+      songIds:["s1","s9","s64","s13","s43","s40","s3","s11","s12","s5","s16"] },
     { id:"pl-sad",       name:"Tristeza Premium 😢",    img:`${IMG}/playlists/tristeza-premium.jpg`,desc:"Cuando el sentimiento es fuerte.", owner:"Spotify",
       songIds:["s33","s21","s22","s52","s23","s34","s24","s48","s50","s54"] },
     { id:"pl-rap",       name:"Rap & R&B",              img:`${IMG}/playlists/rap-rnb.jpg`,         desc:"Hip-hop y R&B de calidad mundial.", owner:"Spotify",
@@ -141,8 +165,8 @@ const DB = {
   buildSongs() {
     const songs = [];
     for (const alb of DB.albums) {
-      for (const [id, title, dur] of alb.songs) {
-        songs.push({ id, title, albumId: alb.id, artistId: alb.artistId, duration: dur });
+      for (const [id, title, dur, img] of alb.songs) {
+        songs.push({ id, title, albumId: alb.id, artistId: alb.artistId, duration: dur, img });
       }
     }
     DB.songs = songs;
@@ -210,6 +234,10 @@ DB.homeSections = [
   { title:"Artistas populares", items:[
     {type:"artist", id:"a-badbunny"},
     {type:"artist", id:"a-karolg"},
+    {type:"artist", id:"a-billie"},
+    {type:"artist", id:"a-olivia"},
+    {type:"artist", id:"a-shakira"},
+    {type:"artist", id:"a-gepe"},
     {type:"artist", id:"a-taylorswift"},
     {type:"artist", id:"a-weeknd"},
     {type:"artist", id:"a-dualipa"},
@@ -219,7 +247,11 @@ DB.homeSections = [
   { title:"Álbumes esenciales", items:[
     {type:"album", id:"al-uvst"},
     {type:"album", id:"al-1989"},
+    {type:"album", id:"al-billie-hmh"},
+    {type:"album", id:"al-olivia-sour"},
+    {type:"album", id:"al-shakira-lmyl"},
     {type:"album", id:"al-motomami"},
+    {type:"album", id:"al-gepe-estilo"},
     {type:"album", id:"al-damn"},
     {type:"album", id:"al-fn"},
     {type:"album", id:"al-ah"},
@@ -245,6 +277,6 @@ DB.homeSections = [
 DB.homeTrending = {
   title: "Canciones del momento",
   queue: "playlist:pl-topglobal",
-  songIds: ["s1","s25","s9","s13","s5","s29","s27","s18","s43","s44"],
+  songIds: ["s56","s60","s64","s68","s1","s25","s9","s13","s5","s29","s27","s18","s43","s44"],
 };
 

@@ -98,6 +98,12 @@ async function loadTrackPreview() {
   const song = Player.song;
   if (!song) return;
 
+  const savedRecent = Store.get("recentlyPlayed");
+  const recent = Array.isArray(savedRecent)
+    ? savedRecent.filter(id => typeof id === "string" && DB.song(id) && id !== song.id)
+    : [];
+  Store.set("recentlyPlayed", [song.id, ...recent].slice(0, 6));
+
   clearPlayerAudio();
   Player.audioStatus = "loading";
   Player.playing = false;

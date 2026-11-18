@@ -49,6 +49,10 @@ function coverBg(item, type) {
   return `background-image:${coverSrc(item, type)}; background-size:cover; background-position:center;`;
 }
 
+function songCoverBg(song) {
+  return coverBg(song?.img ? song : DB.album(song?.albumId) || {}, "album");
+}
+
 /* ─── card estilo Spotify (vertical) ─── */
 function cardHtml({ type, item, subtext, playTarget, href, round = false }) {
   const isActive = Player.song &&
@@ -62,13 +66,16 @@ function cardHtml({ type, item, subtext, playTarget, href, round = false }) {
   const sub = esc(subtext || "");
   const pt = playTarget || `${type}:${item.id}`;
   const url = routeUrl(href || `${type}/${item.id}`);
+  const image = type === "artist" && item.img
+    ? `<img src="${esc(item.img)}" alt="" class="absolute inset-0 h-full w-full object-cover" decoding="async">`
+    : `<div class="absolute inset-0 ${roundCls}" style="${coverBg(item, type)}"></div>`;
 
   return `
 <article class="sp2-card group relative flex flex-col gap-2 rounded-lg p-3 transition-all duration-200 hover:bg-white/[0.08] ${isActive ? "bg-white/[0.06]" : ""}">
   <a class="absolute inset-0 z-0 rounded-lg" href="${url}" aria-label="Abrir ${title}"></a>
   <div class="relative z-10 flex min-w-0 flex-col gap-2 pointer-events-none">
     <div class="relative mb-1 aspect-square w-full overflow-hidden ${roundCls} shadow-lg">
-      <div class="absolute inset-0 ${roundCls}" style="${coverBg(item, type)}"></div>
+      ${image}
       <div class="absolute inset-0 ${roundCls} bg-black/0 transition-colors duration-200 group-hover:bg-black/20"></div>
       <button type="button" class="sp2-play-btn pointer-events-auto absolute bottom-2 right-2 z-20 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-[#1ed760] text-black opacity-0 shadow-xl transition-all duration-200 hover:scale-105 hover:bg-[#3be477] group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100"
         data-collection-play="${pt}" aria-label="Reproducir ${title}">
@@ -103,7 +110,7 @@ function songRowHtml(song, index, opts = {}) {
   <button type="button" class="sp2-row-play pointer-events-none flex h-6 w-6 items-center justify-center text-white opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100" data-play-song="${song.id}" data-queue-type="${qType}" data-queue-id="${qId}" aria-label="Reproducir ${esc(song.title)}">
     <span class="text-[18px]">${icon(isActive && Player.playing ? "pause" : "play")}</span>
   </button>
-  <span class="h-10 w-10 shrink-0 rounded bg-cover bg-center shadow" style="${coverBg(album || {}, "album")}"></span>
+  <span class="h-10 w-10 shrink-0 rounded bg-cover bg-center shadow" style="${songCoverBg(song)}"></span>
   <div class="min-w-0">
     <p class="truncate text-sm font-bold leading-tight ${isActive ? "text-[#1ed760]" : "text-white"}">${esc(song.title)}</p>
     <a href="${artistUrl}" class="block truncate text-xs leading-snug text-[#a7a7a7] hover:text-white hover:underline">${esc(artist?.name || "")}</a>
@@ -139,7 +146,9 @@ function detailHeroHtml({ kind, name, img, meta = "", extra = "", badge = "" }) 
   <div class="absolute inset-0" style="background:linear-gradient(to bottom, rgba(0,0,0,.2) 0%, rgba(18,18,18,.7) 60%, #121212 100%)"></div>
   <div class="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-8">
     ${img ? `<div class="mx-auto h-44 w-44 shrink-0 overflow-hidden ${kind === "Artista" ? "rounded-full" : "rounded-lg"} shadow-2xl ring-1 ring-white/10 sm:mx-0 sm:h-[220px] sm:w-[220px]">
-      <div class="h-full w-full" style="background-image:url('${img}');background-size:cover;background-position:center"></div>
+      ${kind === "Artista"
+        ? `<img src="${esc(img)}" alt="${esc(name)}" class="h-full w-full object-cover" decoding="async">`
+        : `<div class="h-full w-full" style="background-image:url('${img}');background-size:cover;background-position:center"></div>`}
     </div>` : ""}
     <div class="min-w-0 text-center sm:text-left">
       ${badge ? `<p class="mb-1 text-xs font-bold uppercase tracking-widest text-white/70">${esc(badge)}</p>` : ""}
@@ -269,7 +278,7 @@ function renderPlayerUI() {
   const album = song ? DB.album(song.albumId) : null;
   const artist = song ? DB.artist(song.artistId) : null;
 
-  const cover = Player.preview?.artwork || album?.img;
+  const cover = song?.img || Player.preview?.artwork || album?.img;
   const coverStyle = cover ? `url('${cover}')` : "linear-gradient(135deg,#282828,#121212)";
   ["sp2-player-cover", "sp2-mini-cover", "sp2-np-cover"].forEach(id => {
     const el = document.getElementById(id);

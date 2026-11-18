@@ -8,6 +8,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "test": "node --test",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -23,11 +24,14 @@
   ],
   "author": "Matyaz Paredes",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "dependencies": {
-    "astro": "^7.4.5"
+    "astro": "^7.4.12"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.4",
-    "tailwindcss": "^4.3.4"
+    "@tailwindcss/vite": "^4.3.5",
+    "tailwindcss": "^4.3.5"
   }
 }

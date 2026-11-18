@@ -1,0 +1,15 @@
+Artist photos in this directory:
+
+- Billie Eilish: photo by Glenn Francis, CC BY-SA 4.0
+  (https://creativecommons.org/licenses/by-sa/4.0/).
+  https://commons.wikimedia.org/wiki/File:Billie_Eilish_2019_by_Glenn_Francis_(cropped)_2.jpg
+- Olivia Rodrigo: White House staff, public domain.
+  https://commons.wikimedia.org/wiki/File:Olivia_Rodrigo_at_White_House.jpg
+- Shakira: photo by Martin Varsavsky, CC BY 2.0
+  (https://creativecommons.org/licenses/by/2.0/).
+  https://commons.wikimedia.org/wiki/File:Shakira_in_concert_2.jpg
+- Gepe: photo by sauceb, CC BY 2.0
+  (https://creativecommons.org/licenses/by/2.0/).
+  https://commons.wikimedia.org/wiki/File:Gepe.jpg
+
+The interface crops the photos to fit the artist cards and avatars.

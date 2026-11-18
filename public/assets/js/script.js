@@ -14,7 +14,19 @@ let _npCloseTimer = null;
 let _apiSearchTimer = null;
 let _apiSearchController = null;
 
+const NOTIFICATION_IDS = ["new-release", "playlist", "premium"];
 const sidebarLibState = { filter: "all", query: "" };
+const PAGE_BY_PATH = {
+  "/": "home",
+  "/buscar": "search",
+  "/biblioteca": "library",
+  "/explorar": "explore",
+  "/acerca": "about",
+  "/detalle": "detail",
+  "/premium": "premium",
+  "/cuenta": "account",
+  "/iniciar-sesion": "login",
+};
 
 function getPage() {
   return document.body.dataset.page || "home";
@@ -28,8 +40,8 @@ function isDemoAuthenticated() {
   return Store.get("session")?.authenticated === true;
 }
 
-function getLoginDestination() {
-  const next = getParams().get("next");
+function getLoginDestination(search = location.search) {
+  const next = new URLSearchParams(search).get("next");
   if (!next) return "/";
   try {
     const destination = new URL(next, location.origin);
@@ -38,6 +50,77 @@ function getLoginDestination() {
   } catch {
     return "/";
   }
+}
+
+function updateActiveNavigation(page) {
+  document.querySelectorAll("[data-nav-page]").forEach(link => {
+    const active = link.getAttribute("data-nav-page") === page;
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+}
+
+function renderRoute(page) {
+  document.body.dataset.page = page;
+  updateActiveNavigation(page);
+  closeMenus();
+  closeModal();
+  renderCurrentPage();
+  updateHeaderBg();
+}
+
+function navigateTo(url, { replace = false } = {}) {
+  let destination;
+  try {
+    destination = new URL(url, location.href);
+  } catch {
+    return false;
+  }
+
+  if (destination.origin !== location.origin) return false;
+  if (!Object.hasOwn(PAGE_BY_PATH, destination.pathname)) return false;
+  const page = PAGE_BY_PATH[destination.pathname];
+
+  if (page !== "login" && !isDemoAuthenticated()) {
+    const next = `${destination.pathname}${destination.search}${destination.hash}`;
+    return navigateTo(`/iniciar-sesion?next=${encodeURIComponent(next)}`, { replace });
+  }
+  if (page === "login" && isDemoAuthenticated()) {
+    return navigateTo(getLoginDestination(destination.search), { replace });
+  }
+
+  const path = `${destination.pathname}${destination.search}${destination.hash}`;
+  if (path === `${location.pathname}${location.search}${location.hash}`) return true;
+  if (replace) history.replaceState(null, "", path);
+  else history.pushState(null, "", path);
+  renderRoute(page);
+  const back = $("#sp2-btn-back");
+  if (back) back.disabled = false;
+  return true;
+}
+
+function syncRouteFromLocation() {
+  if (!Object.hasOwn(PAGE_BY_PATH, location.pathname)) {
+    location.reload();
+    return;
+  }
+  const page = PAGE_BY_PATH[location.pathname];
+  if (page !== "login" && !isDemoAuthenticated()) {
+    navigateTo(location.href, { replace: true });
+    return;
+  }
+  if (page === "login" && isDemoAuthenticated()) {
+    navigateTo(getLoginDestination(), { replace: true });
+    return;
+  }
+  renderRoute(page);
+}
+
+function initNavigation() {
+  document.addEventListener("click", onDocumentClick);
+  document.addEventListener("change", onDocumentChange);
+  window.addEventListener("popstate", syncRouteFromLocation);
 }
 
 /* ─── render de la página actual ─── */
@@ -340,7 +423,7 @@ function initHeader() {
       onSearchInput(q);
       return;
     }
-    location.href = q ? `/buscar?q=${encodeURIComponent(q)}` : "/buscar";
+    navigateTo(q ? `/buscar?q=${encodeURIComponent(q)}` : "/buscar");
   });
 
   input?.addEventListener("input", () => {
@@ -349,7 +432,7 @@ function initHeader() {
 
   $("#sp2-btn-back")?.addEventListener("click", () => {
     if (history.length > 1) history.back();
-    else location.href = "/";
+    else navigateTo("/");
   });
   $("#sp2-btn-fwd")?.addEventListener("click", () => history.forward());
 
@@ -387,6 +470,51 @@ function setupDropdown(btnId, menuId) {
 function initHeaderMenus() {
   setupDropdown("sp2-profile-btn", "sp2-profile-menu");
   setupDropdown("sp2-notif-btn", "sp2-notif-menu");
+  updateNotificationsUI();
+}
+
+function readNotificationIds() {
+  const saved = Store.get("readNotifications");
+  return Array.isArray(saved) ? saved.filter(id => NOTIFICATION_IDS.includes(id)) : [];
+}
+
+function updateNotificationsUI() {
+  const readIds = new Set(readNotificationIds());
+  const unreadCount = NOTIFICATION_IDS.length - readIds.size;
+  const button = $("#sp2-notif-btn");
+  const badge = $("#sp2-notif-count");
+  const markReadButton = $("#sp2-notif-mark-read");
+
+  if (badge) {
+    badge.textContent = String(unreadCount);
+    badge.hidden = unreadCount === 0;
+  }
+  if (button) {
+    button.setAttribute("aria-label", unreadCount ? `Notificaciones, ${unreadCount} sin leer` : "Notificaciones");
+  }
+  if (markReadButton) {
+    markReadButton.disabled = unreadCount === 0;
+    markReadButton.textContent = unreadCount ? "Marcar todas leídas" : "Todo leído";
+  }
+  document.querySelectorAll("[data-notif-id]").forEach(item => {
+    const isRead = readIds.has(item.getAttribute("data-notif-id"));
+    item.classList.toggle("is-read", isRead);
+    const indicator = item.querySelector(".sp2-notification-unread");
+    if (indicator) indicator.hidden = isRead;
+  });
+}
+
+function markNotificationRead(id) {
+  if (!NOTIFICATION_IDS.includes(id)) return;
+  const readIds = new Set(readNotificationIds());
+  readIds.add(id);
+  Store.set("readNotifications", [...readIds]);
+  updateNotificationsUI();
+}
+
+function markAllNotificationsRead() {
+  Store.set("readNotifications", NOTIFICATION_IDS);
+  updateNotificationsUI();
 }
 
 /* ─── acciones globales ─── */
@@ -435,8 +563,31 @@ function onPlaySongClick(target) {
 }
 
 function onDocumentClick(e) {
-  // Los enlaces reales navegan por su cuenta.
-  if (e.target.closest("a[href]")) return;
+  const link = e.target.closest("a[href]");
+  if (link) {
+    const href = link.getAttribute("href");
+    if (
+      href &&
+      !href.startsWith("#") &&
+      !link.hasAttribute("download") &&
+      (!link.target || link.target === "_self") &&
+      !e.defaultPrevented &&
+      e.button === 0 &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.shiftKey &&
+      !e.altKey &&
+      navigateTo(link.href)
+    ) {
+      e.preventDefault();
+    }
+    return;
+  }
+
+  if (e.target.closest("[data-api-retry]")) {
+    scheduleApiSearch();
+    return;
+  }
 
   if (e.target.closest("[data-modal-close]")) {
     e.preventDefault();
@@ -509,7 +660,10 @@ function onDocumentClick(e) {
   const notifBtn = e.target.closest("[data-notif-action]");
   if (notifBtn) {
     e.preventDefault();
-    handleNotification(notifBtn.getAttribute("data-notif-action"));
+    handleNotification(
+      notifBtn.getAttribute("data-notif-action"),
+      notifBtn.getAttribute("data-notif-id"),
+    );
     return;
   }
 
@@ -520,7 +674,14 @@ function onDocumentClick(e) {
     if (action === "reset-local-data") openResetLocalDataModal();
     else if (action === "logout") {
       Store.del("session");
-      location.replace("/iniciar-sesion");
+      navigateTo("/iniciar-sesion", { replace: true });
+    } else if (action === "clear-recent-history") {
+      Store.del("recentlyPlayed");
+      refreshLibraryRecentSection();
+      refreshHomeRecentSection();
+      toast("Historial de reproducción borrado");
+    } else if (action === "mark-notifications-read") {
+      markAllNotificationsRead();
     }
     return;
   }
@@ -665,13 +826,12 @@ function choosePlan(pid) {
   });
 }
 
-function handleNotification(action) {
+function handleNotification(action, notificationId) {
+  markNotificationRead(notificationId);
   closeMenus();
-  const dot = $(".sp2-notif-dot");
-  if (dot) dot.style.display = "none";
-  if (action === "new-release") location.href = routeUrl("album/al-uvst");
-  else if (action === "playlist") location.href = routeUrl("playlist/pl-daily1");
-  else if (action === "premium") location.href = "/premium";
+  if (action === "new-release") navigateTo(routeUrl("album/al-uvst"));
+  else if (action === "playlist") navigateTo(routeUrl("playlist/pl-daily1"));
+  else if (action === "premium") navigateTo("/premium");
 }
 
 /* ─── modal genérico ─── */
@@ -744,7 +904,7 @@ function openCreatePlaylistModal() {
     closeModal();
     toast(`Playlist "${name}" creada 🎉`);
     renderSidebar();
-    location.href = routeUrl(`playlist/${id}`);
+    navigateTo(routeUrl(`playlist/${id}`));
   });
 }
 
@@ -778,7 +938,7 @@ function addSongsListHtml(pl, query = "") {
     const artist = DB.artist(s.artistId);
     const inPlaylist = pl.songIds.includes(s.id);
     return `<button type="button" class="sp2-add-song-row" data-add-song="${s.id}" aria-pressed="${inPlaylist}">
-      <span class="h-10 w-10 shrink-0 rounded bg-cover bg-center" style="${coverBg(album || {}, "album")}"></span>
+      <span class="h-10 w-10 shrink-0 rounded bg-cover bg-center" style="${songCoverBg(s)}"></span>
       <span class="min-w-0 flex-1 text-left">
         <span class="block truncate text-sm font-bold text-white">${esc(s.title)}</span>
         <span class="block truncate text-xs text-[#a7a7a7]">${esc(artist?.name || "")} · ${esc(album?.title || "")}</span>
@@ -886,7 +1046,7 @@ function openContextMenu(value) {
         toast(`${ids.length} canciones agregadas a la cola`);
       } else if (action === "open") {
         closeModal();
-        location.href = routeUrl(`${type}/${id}`);
+        navigateTo(routeUrl(`${type}/${id}`));
       } else if (action === "share") {
         copyText(new URL(routeUrl(`${type}/${id}`), location.href).href);
         closeModal();
@@ -1081,20 +1241,10 @@ function initPlayerEvents() {
     });
   });
 
-  const mini = $("#sp2-mini-player");
-  mini?.addEventListener("click", e => {
-    if (e.target.closest("#sp2-mini-play")) return;
-    openNowPlaying();
-  });
-  mini?.addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      openNowPlaying();
-    }
-  });
+  $("#sp2-mini-open")?.addEventListener("click", openNowPlaying);
 
   const openCurrentAlbum = () => {
-    if (Player.song?.albumId) location.href = routeUrl(`album/${Player.song.albumId}`);
+    if (Player.song?.albumId) navigateTo(routeUrl(`album/${Player.song.albumId}`));
     else toast("Elige una canción primero");
   };
 
@@ -1102,7 +1252,7 @@ function initPlayerEvents() {
   playerCover?.addEventListener("click", openCurrentAlbum);
   $("#sp2-player-title")?.addEventListener("click", openCurrentAlbum);
   $("#sp2-player-artist")?.addEventListener("click", () => {
-    if (Player.song?.artistId) location.href = routeUrl(`artist/${Player.song.artistId}`);
+    if (Player.song?.artistId) navigateTo(routeUrl(`artist/${Player.song.artistId}`));
     else toast("Elige una canción primero");
   });
 
@@ -1133,7 +1283,7 @@ function initKeyboard() {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
       if (getPage() === "search") $("#sp2-search-input")?.focus();
-      else location.href = "/buscar";
+      else navigateTo("/buscar");
       return;
     }
 
@@ -1185,6 +1335,8 @@ function onPlayerChange() {
   renderSidebar();
   updateAccountUI();
   refreshCollectionPlayIcons();
+  if (getPage() === "home") refreshHomeRecentSection();
+  if (getPage() === "library") refreshLibraryRecentSection();
   if (_queueOpen) renderQueuePanel(_queueTab);
 }
 
@@ -1213,7 +1365,8 @@ function init() {
     return;
   }
 
-  mountShell();
+  initNavigation();
+  initShell();
 
   if (page === "login") {
     $("#sp2-view")?.addEventListener("submit", onViewSubmit);
@@ -1228,8 +1381,6 @@ function init() {
   initPlayerEvents();
   initKeyboard();
 
-  document.addEventListener("click", onDocumentClick);
-  document.addEventListener("change", onDocumentChange);
   document.addEventListener("click", e => {
     if (e.target.closest("#sp2-profile-btn, #sp2-notif-btn, #sp2-profile-menu, #sp2-notif-menu")) return;
     closeMenus();

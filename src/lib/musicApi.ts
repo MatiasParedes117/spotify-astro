@@ -32,16 +32,32 @@ interface ITunesSearchResponse {
 }
 
 const musicTrackCache = new Map<string, MusicTrack | null>();
+const SEARCH_TIMEOUT_MS = 15_000;
 
 export const MusicAPI = {
   async searchTracks(query: string, { signal, limit = 8 }: MusicApiOptions = {}): Promise<MusicTrack[]> {
+    const term = query.trim();
+    if (!term) return [];
+
+    const timeoutSignal = AbortSignal.timeout(SEARCH_TIMEOUT_MS);
+    const requestSignal = signal
+      ? AbortSignal.any([signal, timeoutSignal])
+      : timeoutSignal;
     const params = new URLSearchParams({
-      term: query,
+      term,
       entity: 'song',
       country: 'CL',
-      limit: String(limit),
+      limit: String(Math.max(1, Math.min(200, Math.trunc(limit) || 8))),
     });
-    const response = await fetch(`https://itunes.apple.com/search?${params}`, { signal });
+    let response: Response;
+    try {
+      response = await fetch(`https://itunes.apple.com/search?${params}`, { signal: requestSignal });
+    } catch (error) {
+      if (timeoutSignal.aborted && !signal?.aborted) {
+        throw new Error('La búsqueda en iTunes superó el tiempo de espera');
+      }
+      throw error;
+    }
     if (!response.ok) throw new Error(`iTunes Search respondió ${response.status}`);
 
     const data: unknown = await response.json();
@@ -57,14 +73,16 @@ export const MusicAPI = {
     const key = `${normalizeMusicText(song)}|${normalizeMusicText(artist)}`;
     if (musicTrackCache.has(key)) return musicTrackCache.get(key) ?? null;
 
-    const results = await MusicAPI.searchTracks(`${song} ${artist}`, { signal, limit: 15 });
+    const results = await MusicAPI.searchTracks(`${song} ${artist}`, { signal, limit: 25 });
     const normalizedTitle = normalizeMusicText(song);
     const normalizedArtist = normalizeMusicText(artist);
-    const titleScore = (candidate: MusicTrack) => compareMusicText(normalizedTitle, normalizeMusicText(candidate.title));
-    const artistScore = (candidate: MusicTrack) => compareMusicText(normalizedArtist, normalizeMusicText(candidate.artist));
     const ranked = results
-      .map(track => ({ track, title: titleScore(track), artist: artistScore(track) }))
-      .filter(result => result.title >= 0.65 && result.artist >= 0.5)
+      .map(track => ({
+        track,
+        title: compareMusicText(normalizedTitle, normalizeMusicText(track.title)),
+        artist: compareMusicText(normalizedArtist, normalizeMusicText(track.artist)),
+      }))
+      .filter(result => result.title >= 0.65 && result.artist >= 0.5 && result.track.preview)
       .sort((a, b) => (b.title * 0.75 + b.artist * 0.25) - (a.title * 0.75 + a.artist * 0.25));
     const match = ranked[0]?.track ?? null;
     musicTrackCache.set(key, match);

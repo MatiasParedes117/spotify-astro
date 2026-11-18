@@ -1,0 +1,55 @@
+<section class="sp2-sidebar-library" aria-label="Tu biblioteca">
+  <div class="sp2-lib-header">
+    <a class="sp2-lib-title-btn" href="/biblioteca" aria-label="Tu biblioteca">
+      <span id="sp2-ico-lib" class="sp2-lib-title-icon"></span>
+      <span>Tu biblioteca</span>
+    </a>
+    <button
+      type="button"
+      class="sp2-lib-icon-btn"
+      id="sp2-lib-search-btn"
+      aria-label="Buscar en tu biblioteca"
+      title="Buscar"
+    >
+      <span id="sp2-ico-lib-search"></span>
+    </button>
+    <button
+      type="button"
+      class="sp2-lib-icon-btn"
+      id="sp2-lib-create"
+      aria-label="Crear playlist"
+      title="Crear playlist"
+    >
+      <span id="sp2-ico-lib-plus"></span>
+    </button>
+  </div>
+
+  <div id="sp2-lib-search-wrap" class="sp2-lib-search-wrap hidden">
+    <div class="sp2-lib-search-field">
+      <span class="sp2-lib-search-icon" id="sp2-ico-libsrch2"></span>
+      <input
+        id="sp2-lib-search-sidebar"
+        type="search"
+        placeholder="Buscar en tu biblioteca"
+        aria-label="Buscar biblioteca"
+      />
+    </div>
+  </div>
+
+  <div class="sp2-lib-chips" role="group" aria-label="Filtrar biblioteca">
+    <button type="button" class="sp2-lib-chip active" data-lib-chip="all" aria-pressed="true">
+      Todas
+    </button>
+    <button type="button" class="sp2-lib-chip" data-lib-chip="playlist" aria-pressed="false">
+      Playlists
+    </button>
+    <button type="button" class="sp2-lib-chip" data-lib-chip="album" aria-pressed="false">
+      Álbumes
+    </button>
+    <button type="button" class="sp2-lib-chip" data-lib-chip="artist" aria-pressed="false">
+      Artistas
+    </button>
+  </div>
+
+  <div id="sp2-lib-list" class="sp2-lib-list scroll-area"></div>
+</section>

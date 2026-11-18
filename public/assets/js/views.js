@@ -4,16 +4,47 @@
  * esqueleto HTML de cada página, por lo que aquí no se anida otro <main>.
  * ================================================================== */
 
+const FEATURED_ARTIST_IDS = [
+  "a-badbunny", "a-karolg", "a-billie", "a-olivia",
+  "a-shakira", "a-gepe", "a-taylorswift", "a-weeknd",
+];
+
+function featuredArtists(limit = FEATURED_ARTIST_IDS.length) {
+  return FEATURED_ARTIST_IDS.map(id => DB.artist(id)).filter(Boolean).slice(0, limit);
+}
+
 /* ═══════════════════════════════════════════════════
    HOME
 ═══════════════════════════════════════════════════ */
-function renderHome() {
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
-
-  // Accesos rápidos (últimos reproducidos)
-  const recentItems = DB.homeSections[0]?.items || [];
+function homeRecentSectionHtml() {
+  const savedRecent = Store.get("recentlyPlayed");
+  const recentSongIds = Array.isArray(savedRecent)
+    ? [...new Set(savedRecent.filter(id => typeof id === "string" && DB.song(id)))].slice(0, 6)
+    : [];
+  const recentItems = recentSongIds.length
+    ? recentSongIds.map(id => ({ type: "song", id }))
+    : DB.homeSections[0]?.items || [];
   const quickGrid = recentItems.slice(0, 6).map(it => {
+    if (it.type === "song") {
+      const song = DB.song(it.id);
+      if (!song) return "";
+      const album = DB.album(song.albumId);
+      const artist = DB.artist(song.artistId);
+      const name = esc(song.title);
+      const albumId = album?.id || "";
+      const isActive = Player.song?.id === song.id;
+      return `
+<article class="sp2-quick-card group relative flex items-center gap-3 overflow-hidden rounded-md bg-white/[0.07] transition-all hover:bg-white/[0.12] ${isActive ? "ring-1 ring-[#1ed760]/40" : ""}">
+  <a class="absolute inset-0 z-0" href="${routeUrl(`album/${albumId}`)}" aria-label="Ver álbum de ${name}"></a>
+  <span class="relative z-10 h-16 w-16 shrink-0 bg-cover bg-center pointer-events-none" style="${songCoverBg(song)}"></span>
+  <span class="relative z-10 min-w-0 flex-1 truncate pr-2 text-sm font-bold leading-tight text-white pointer-events-none">${name}<span class="mt-1 block truncate text-xs font-medium text-[#a7a7a7]">${esc(artist?.name || "")}</span></span>
+  <button class="sp2-quick-play relative z-20 mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1ed760] text-black shadow-xl transition-transform hover:scale-105"
+    data-play-song="${song.id}" data-queue-type="album" data-queue-id="${albumId}" aria-label="Reproducir ${name} de ${esc(artist?.name || "")}">
+    <span class="ml-0.5 flex h-5 w-5 items-center justify-center text-[18px]">${icon(isActive && Player.playing ? "pause" : "play")}</span>
+  </button>
+</article>`;
+    }
+
     let obj, lnk, bg;
     if (it.type === "album")         { obj = DB.album(it.id);    lnk = `album/${it.id}`;    bg = coverBg(obj, "album"); }
     else if (it.type === "playlist") { obj = DB.playlist(it.id); lnk = `playlist/${it.id}`; bg = coverBg(obj, "playlist"); }
@@ -33,6 +64,33 @@ function renderHome() {
 </article>`;
   }).join("");
 
+  const title = recentSongIds.length ? "Continúa escuchando" : "Empieza por aquí";
+  const eyebrow = recentSongIds.length ? "Reproducido recientemente" : "Selección para ti";
+  return `
+<section id="sp2-home-recent-section" class="mb-10">
+  <div class="sp2-home-section-heading">
+  <div>
+    <p class="sp2-eyebrow">${eyebrow}</p>
+    <h2>${title}</h2>
+  </div>
+  <a href="/biblioteca" class="sp2-section-link">Ver biblioteca <span aria-hidden="true">→</span></a>
+  </div>
+  <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+  ${quickGrid || `<p class="text-sm text-[#a7a7a7]">Empieza a reproducir algo para ver tus accesos rápidos.</p>`}
+  </div>
+</section>`;
+}
+
+function refreshHomeRecentSection() {
+  const section = document.getElementById("sp2-home-recent-section");
+  if (section) section.outerHTML = homeRecentSectionHtml();
+}
+
+function renderHome() {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
+  const firstName = getLocalUserProfile().name.split(/\s+/)[0];
+
   const heroCovers = ["al-uvst", "al-fn", "al-ah", "al-msb"].map((id, index) => {
     const album = DB.album(id);
     if (!album) return "";
@@ -42,7 +100,6 @@ function renderHome() {
   // Canciones del momento
   const trendSongs = (DB.homeTrending?.songIds || []).slice(0, 6).map((sid, i) => {
     const song = DB.song(sid); if (!song) return "";
-    const album = DB.album(song.albumId);
     const artist = DB.artist(song.artistId);
     const isActive = Player.song?.id === sid;
     return `
@@ -50,7 +107,7 @@ function renderHome() {
   data-play-song="${sid}" data-queue-type="playlist" data-queue-id="pl-topglobal" tabindex="0" role="button"
   aria-label="Reproducir ${esc(song.title)} de ${esc(artist?.name || "")}">
   <span class="w-6 shrink-0 text-center text-sm tabular-nums ${isActive ? "text-[#1ed760]" : "text-[#a7a7a7]"}">${isActive && Player.playing ? `<span class="text-[14px]">${icon("volume-low")}</span>` : i + 1}</span>
-  <span class="h-11 w-11 shrink-0 rounded bg-cover bg-center shadow-sm" style="${coverBg(album || {}, "album")}"></span>
+  <span class="h-11 w-11 shrink-0 rounded bg-cover bg-center shadow-sm" style="${songCoverBg(song)}"></span>
   <div class="min-w-0 flex-1">
     <p class="truncate text-sm font-semibold leading-tight ${isActive ? "text-[#1ed760]" : "text-white"}">${esc(song.title)}</p>
     <p class="truncate text-xs text-[#a7a7a7]">${esc(artist?.name || "")}</p>
@@ -64,7 +121,8 @@ function renderHome() {
 
   // Secciones de tarjetas
   const sections = DB.homeSections.slice(1).map(sec => {
-    const cards = sec.items.slice(0, 6).map(it => {
+    const itemLimit = sec.title === "Artistas populares" || sec.title === "Álbumes esenciales" ? 8 : 6;
+    const cards = sec.items.slice(0, itemLimit).map(it => {
       let obj, sub;
       if (it.type === "artist")        { obj = DB.artist(it.id);   sub = "Artista"; }
       else if (it.type === "album")    { obj = DB.album(it.id);    sub = `Álbum · ${DB.artist(obj?.artistId)?.name || ""}`; }
@@ -83,7 +141,7 @@ function renderHome() {
   <section class="sp2-home-hero mb-9">
     <div class="sp2-home-hero-copy">
       <p class="sp2-home-hero-kicker">Tu espacio · Tu sonido</p>
-      <h1>${greeting}<br/><span>que suena a ti.</span></h1>
+      <h1>${greeting}, ${esc(firstName)}<br/><span>que suena a ti.</span></h1>
       <p class="sp2-home-hero-description">Vuelve a tus favoritos y encuentra algo nuevo para cada momento.</p>
       <div class="sp2-home-hero-actions">
         <a href="/explorar" class="sp2-home-hero-primary">${icon("play")} Explorar música</a>
@@ -94,18 +152,7 @@ function renderHome() {
     <span class="sp2-home-hero-glow" aria-hidden="true"></span>
   </section>
 
-  <section class="mb-10">
-    <div class="sp2-home-section-heading">
-      <div>
-        <p class="sp2-eyebrow">Tu biblioteca</p>
-        <h2>Continúa escuchando</h2>
-      </div>
-      <a href="/biblioteca" class="sp2-section-link">Ver biblioteca <span aria-hidden="true">→</span></a>
-    </div>
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-    ${quickGrid || `<p class="text-sm text-[#a7a7a7]">Empieza a reproducir algo para ver tus accesos rápidos.</p>`}
-    </div>
-  </section>
+  ${homeRecentSectionHtml()}
 
   <section class="mb-9 grid grid-cols-1 gap-6 lg:grid-cols-2">
     <div>
@@ -171,7 +218,7 @@ function searchDiscoveryHtml() {
 
 <section class="mt-10">
   ${sectionHeader("Artistas para empezar", "explore")}
-  ${cardGrid(DB.artists.slice(0, 6).map(a => cardHtml({ type: "artist", item: a, subtext: "Artista", round: true })).join(""))}
+  ${cardGrid(featuredArtists().map(a => cardHtml({ type: "artist", item: a, subtext: "Artista", round: true })).join(""))}
 </section>`;
 }
 
@@ -214,7 +261,10 @@ function apiSearchResultsHtml() {
     return `<p class="mb-6 text-sm text-[#a7a7a7]" role="status">Buscando canciones en iTunes…</p>`;
   }
   if (searchState.apiStatus === "error") {
-    return `<p class="mb-6 rounded-lg bg-white/[0.05] p-4 text-sm text-[#a7a7a7]" role="status">${esc(searchState.apiError)}</p>`;
+    return `<div class="mb-6 flex flex-col gap-3 rounded-lg bg-white/[0.05] p-4 sm:flex-row sm:items-center sm:justify-between" role="alert">
+      <p class="text-sm text-[#a7a7a7]">${esc(searchState.apiError)}</p>
+      <button type="button" class="sp2-primary-btn min-h-11 shrink-0" data-api-retry>Reintentar</button>
+    </div>`;
   }
   if (searchState.apiStatus === "empty") {
     return `<p class="mb-6 text-sm text-[#a7a7a7]">No se encontraron canciones en el catálogo de iTunes.</p>`;
@@ -425,9 +475,8 @@ function renderArtist(id) {
     type: "album", item: a, subtext: `${a.year} · Álbum`,
   })).join("");
 
-  const relatedArtists = DB.artists
+  const relatedArtists = featuredArtists()
     .filter(a => a.id !== id)
-    .slice(0, 6)
     .map(a => cardHtml({ type: "artist", item: a, subtext: "Artista", round: true })).join("");
 
   return `
@@ -492,7 +541,7 @@ function renderGenre(id) {
 
     <section class="mb-9">
       ${sectionHeader("Artistas del género")}
-      ${cardGrid(DB.artists.slice(0, 6).map(a => cardHtml({ type: "artist", item: a, subtext: "Artista", round: true })).join(""))}
+      ${cardGrid(featuredArtists().map(a => cardHtml({ type: "artist", item: a, subtext: "Artista", round: true })).join(""))}
     </section>
 
     <section>
@@ -613,6 +662,8 @@ function renderLibrary() {
     </button>
   </div>
 
+  ${libraryRecentSectionHtml()}
+
   <div class="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar biblioteca">${chips}</div>
 
   <div class="mb-5 flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5">
@@ -626,13 +677,47 @@ function renderLibrary() {
 </div>`;
 }
 
+function libraryRecentSectionHtml() {
+  const savedRecent = Store.get("recentlyPlayed");
+  const songs = Array.isArray(savedRecent)
+    ? [...new Set(savedRecent.filter(id => typeof id === "string" && DB.song(id)))]
+      .slice(0, 6)
+      .map(id => DB.song(id))
+      .filter(Boolean)
+    : [];
+  const content = songs.length
+    ? `<div class="flex flex-col gap-1">${songs.map((song, index) =>
+        songRowHtml(song, index, { showAlbum: true, queueType: "album", queueId: song.albumId })
+      ).join("")}</div>`
+    : `<div class="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-5 text-sm text-[#a7a7a7]">
+        Aún no has reproducido canciones. <a href="/buscar" class="font-bold text-white underline underline-offset-4">Encuentra algo para escuchar</a>.
+      </div>`;
+
+  return `
+<section id="sp2-library-recent" class="mb-8">
+  <div class="mb-3 flex items-center justify-between gap-3">
+    <div>
+      <p class="sp2-eyebrow">Tu actividad</p>
+      <h2 class="text-xl font-black text-white">Escuchado recientemente</h2>
+    </div>
+    ${songs.length ? `<button type="button" class="sp2-section-link min-h-11 px-2" data-action="clear-recent-history">Borrar historial</button>` : ""}
+  </div>
+  ${content}
+</section>`;
+}
+
+function refreshLibraryRecentSection() {
+  const section = document.getElementById("sp2-library-recent");
+  if (section) section.outerHTML = libraryRecentSectionHtml();
+}
+
 /* ═══════════════════════════════════════════════════
    EXPLORAR
 ═══════════════════════════════════════════════════ */
 function renderExplore() {
-  const newAlbums = [...DB.albums].sort((a, b) => b.year - a.year).slice(0, 6);
+  const newAlbums = [...DB.albums].sort((a, b) => b.year - a.year).slice(0, 8);
   const featuredPlaylists = DB.playlists.slice(0, 6);
-  const artists = DB.artists.slice(0, 6);
+  const artists = featuredArtists();
 
   const moods = [
     { name: "Para entrenar", desc: "Energía al máximo", id: "pl-fitness", color: "#e8115b" },
@@ -1116,13 +1201,12 @@ function renderQueuePanel(tab = "queue") {
     content.innerHTML = `<div class="flex h-40 flex-col items-center justify-center gap-3 px-6 text-center text-sm text-[#a7a7a7]">${icon("queue")}<p>La cola está vacía</p></div>`;
     return;
   }
-  const curAlbum = DB.album(cur.albumId);
   const upcoming = Player.queue.slice(Player.index + 1).map(sid => DB.song(sid)).filter(Boolean);
 
   content.innerHTML = `<div class="px-3 pb-8">
     <p class="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-[#a7a7a7]">Sonando ahora</p>
     <div class="mb-5 flex items-center gap-3 rounded-xl bg-white/10 p-3">
-      <span class="h-12 w-12 shrink-0 rounded bg-cover bg-center shadow" style="${coverBg(curAlbum || {}, "album")}"></span>
+      <span class="h-12 w-12 shrink-0 rounded bg-cover bg-center shadow" style="${songCoverBg(cur)}"></span>
       <div class="min-w-0 flex-1">
         <p class="truncate text-sm font-bold text-[#1ed760]">${esc(cur.title)}</p>
         <p class="truncate text-xs text-[#a7a7a7]">${esc(DB.artist(cur.artistId)?.name || "")}</p>
@@ -1130,9 +1214,8 @@ function renderQueuePanel(tab = "queue") {
     </div>
     <p class="mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-[#a7a7a7]">A continuación</p>
     ${upcoming.length ? upcoming.slice(0, 20).map(s => {
-      const al = DB.album(s.albumId);
       return `<button type="button" class="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-white/[0.07]" data-queue-play="${s.id}">
-        <span class="h-10 w-10 shrink-0 rounded bg-cover bg-center" style="${coverBg(al || {}, "album")}"></span>
+        <span class="h-10 w-10 shrink-0 rounded bg-cover bg-center" style="${songCoverBg(s)}"></span>
         <span class="min-w-0 flex-1">
           <span class="block truncate text-sm font-medium text-white">${esc(s.title)}</span>
           <span class="block truncate text-xs text-[#a7a7a7]">${esc(DB.artist(s.artistId)?.name || "")}</span>
